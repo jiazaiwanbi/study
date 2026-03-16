@@ -1,0 +1,18 @@
+{
+    "markdown.validate.duplicateLinkDefinitions.enabled": "warning",
+    "markdown.validate.enabled": false,
+
+
+
+
+    // 1. 彻底关闭 markdownlint 的实时扫描功能
+    "markdownlint.run": "onSave", // 或者改为 "manual" (手动)，这样平时它就不会报错了
+
+    // 2. 如果你想保留插件但忽略所有规则（不推荐，不如直接禁用插件）
+    "markdownlint.config": {
+        "default": false
+    },
+    "json.schemaDownload.trustedDomains": {
+        "https://raw.githubusercontent.com": true
+    },
+}
