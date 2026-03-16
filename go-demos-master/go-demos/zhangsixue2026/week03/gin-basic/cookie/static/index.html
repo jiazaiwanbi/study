@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .get-cookie-btn {
+            background-color: #28a745;
+        }
+        .get-cookie-btn:hover {
+            background-color: #1e7e34;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            min-height: 50px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .code {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cookie Demo</h1>
+        <div class="container">
+            <h2>📝 登录表单</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">用户名:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">登录</button>
+            </form>
+            
+            <div id="loginResult" class="result" style="display: none;"></div>
+        </div>
+        <div class="container">
+            <h2>🚪 注销功能</h2>
+            <button id="logoutBtn" class="logout-btn">注销登录</button>
+            <div id="logoutResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 登录表单处理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '正在登录...';
+            resultDiv.className = 'result';
+
+            const data = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    resultDiv.innerHTML = `✅ ${data.message}<br>Cookie已设置，用户名: ${document.getElementById('username').value}`;
+                    resultDiv.className = 'result success';
+                } else if (data.error) {
+                    resultDiv.innerHTML = `❌ 错误: ${data.error}`;
+                    resultDiv.className = 'result error';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `❌ 网络错误: ${error.message}`;
+                resultDiv.className = 'result error';
+            });
+        });
+
+        // 获取Cookie按钮处理
+        document.getElementById('getCookieBtn').addEventListener('click', function() {
+            const resultDiv = document.getElementById('cookieResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '正在获取Cookie...';
+            resultDiv.className = 'result';
+
+            fetch('/getcookie', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.username) {
+                    resultDiv.innerHTML = `✅ Cookie中的用户名: <strong>${data.username}</strong>`;
+                    resultDiv.className = 'result success';
+                } else if (data.error) {
+                    resultDiv.innerHTML = `❌ ${data.error}<br>请先登录以设置Cookie`;
+                    resultDiv.className = 'result error';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `❌ 网络错误: ${error.message}`;
+                resultDiv.className = 'result error';
+            });
+        });
+
+        // 注销按钮处理
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            const resultDiv = document.getElementById('logoutResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '正在注销...';
+            resultDiv.className = 'result';
+
+            fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    resultDiv.innerHTML = `✅ ${data.message}<br>所有Cookie已清除`;
+                    resultDiv.className = 'result success';
+                    
+                    // 清空登录表单
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                    
+                    // 隐藏登录结果
+                    document.getElementById('loginResult').style.display = 'none';
+                    
+                    // 自动刷新Cookie状态
+                    setTimeout(() => {
+                        document.getElementById('getCookieBtn').click();
+                    }, 1000);
+                } else if (data.error) {
+                    resultDiv.innerHTML = `❌ 注销失败: ${data.error}`;
+                    resultDiv.className = 'result error';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `❌ 网络错误: ${error.message}`;
+                resultDiv.className = 'result error';
+            });
+        });
+    </script>
+</body>
+</html>
